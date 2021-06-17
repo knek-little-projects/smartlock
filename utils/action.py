@@ -112,6 +112,9 @@ def compute_actions(
     >>> 
     """
 
+    if now is None:
+        return BLOCK_ALL
+
     if allow_all_periods is not None:
         if any(now in period for period in allow_all_periods):
             return ALLOW_ALL
