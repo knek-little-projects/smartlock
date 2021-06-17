@@ -1,0 +1,2 @@
+# run smartlock
+* * * * * root bash -c 'for i in $(seq 60); do sleep 1; DISPLAY=:0 smartlock --config /etc/smartlock.yaml &>> /var/log/smartlock.log; done'

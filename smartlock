@@ -1,0 +1,72 @@
+#!/usr/bin/env python3.8
+"""
+Usage:
+    smartlock <config_file> [--dry-run] [-R] [--time=TIME]
+
+Options:
+    -s --dry-run
+    -t --time=TIME
+    -R --remote-time
+"""
+from typing import *
+from utils.executor import Executor
+from utils.action import Action, compute_actions
+from utils.config import Config
+from utils.remote_time import get_remote_utc_datetime
+from docopt import docopt
+import datetime as dt
+import logging
+import yaml
+import requests
+
+
+def is_activity_positive(url):
+    try:
+        return requests.get(url).json()
+    except:
+        return False
+
+
+def get_now(timezone, use_remote: Optional[bool], parse_time: Optional[str]):
+    now = dt.datetime.now().astimezone(timezone)
+
+    if use_remote:
+        now = get_remote_utc_datetime().astimezone(timezone)
+
+        if now is not None:
+            return now
+        
+    if parse_time:
+        time = dt.datetime.strptime(parse_time, "%H:%M")
+        now = now.replace(hour=time.hour, minute=time.minute)
+
+    return now
+
+
+def main():
+    logging.basicConfig(level=logging.DEBUG)
+
+    args = docopt(__doc__)
+    config = Config.parse_file(args["<config_file>"])
+    exe = Executor(dry_run=args["--dry-run"], env=config.env)
+
+    now = get_now(config.timezone, use_remote=args["--remote-time"], parse_time=args["--time"])
+    logging.debug("Now is %s" % now)
+
+    actions = compute_actions(
+        now,
+        is_activity_positive=is_activity_positive(config.is_activity_allowed_url),
+        allowed_activity_periods=config.allowed_activity_periods,
+        danger_periods=config.danger_periods,
+        critical_periods=config.critical_periods,
+        allow_all_periods=config.allow_all_periods,
+        dinner_periods=config.dinner_periods,
+    )
+    logging.debug(" ".join(action.name for action in actions))
+
+    for action in actions:
+        exe.execute(config.commands[action.name])
+
+
+if __name__ == "__main__":
+    main()

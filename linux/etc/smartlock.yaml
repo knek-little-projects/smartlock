@@ -1,0 +1,123 @@
+timezone: +3
+
+is_activity_allowed_url: http://pkradius.ru:12345/check-allowed/activity
+
+allowed_activity_periods:
+  - 04:00 23:00
+
+danger_periods:
+  - 14:00 23:00
+
+critical_periods:
+  - 23:00 04:00
+
+dinner_periods:
+  - 10:00 10:01
+  - 12:00 12:01
+  - 14:00 14:01
+  - 16:00 16:01
+  - 18:00 18:01
+  - 20:00 20:01
+
+allow_all_periods: null
+
+env:
+  
+  user: x
+
+  disallow_hosts: |
+    instagram.com
+    www.instagram.com
+    twitter.com
+    www.twitter.com
+    www.binance.com
+    binance.com
+    coub.com
+    pikabu.ru
+    joyreactor.cc reactor.cc joyreactor.com safereactor.cc www.safereactor.cc
+    acomics.ru www.acomics.ru totempole666.com www.girlgeniusonline.com girlgeniusonline.com
+    video.ya.ru video.yandex.ru ya.ru yandex.ru
+    vk.com www.vk.com vkontakte.ru vk.ru m.vk.com
+    2ch.hk
+    googlevideo.com youtu.be youtube-nocookie.com youtube.googleapis.com youtubei.googleapis.com ytimg.com ytimg.l.google.com www.youtube.com youtube.com wide-youtube.l.google.com wide-youtube.l.google.com
+    youtube.ru www.youtube.ru
+    youtu.be
+    youtube.com
+    youtube.com www.youtube.com
+    uk.youtube.com
+    de.youtube.com
+    tr.youtube.com
+    jp.youtube.com
+    au.youtube.com
+    ca.youtube.com
+    fr.youtube.com
+    ru.youtube.com
+    help.youtube.com
+    m.youtube.com
+    img.youtube.com
+    gdata.youtube.com
+    sjc-v1.sjc.youtube.com
+    sjc-v2.sjc.youtube.com
+    sjc-v3.sjc.youtube.com
+    sjc-v4.sjc.youtube.com
+    sjc-v5.sjc.youtube.com
+    sjc-v6.sjc.youtube.com
+    sjc-v7.sjc.youtube.com
+    sjc-v8.sjc.youtube.com
+    sjc-v9.sjc.youtube.com
+    sjc-v10.sjc.youtube.com
+    sjc-v11.sjc.youtube.com
+    sjc-v12.sjc.youtube.com
+    sjc-v13.sjc.youtube.com
+    sjc-v14.sjc.youtube.com
+    sjc-v15.sjc.youtube.com
+    sjc-v16.sjc.youtube.com
+    sjc-v17.sjc.youtube.com
+    sjc-v18.sjc.youtube.com
+    sjc-v19.sjc.youtube.com
+    sjc-v20.sjc.youtube.com
+    sjc-v21.sjc.youtube.com
+    sjc-v22.sjc.youtube.com
+    sjc-v23.sjc.youtube.com
+    sjc-v24.sjc.youtube.com
+    sjc-v25.sjc.youtube.com
+    wide-youtube.l.google.com
+
+  disallow_exe:
+    telegram
+  
+commands:
+
+  BLOCK_ACTIVITIES: |
+    echo $disallow_hosts | smartlock-hostctl block /etc/hosts
+    echo $disallow_exe | xargs -n1 pkill -KILL
+
+  UNBLOCK_ACTIVITIES: |
+    smartlock-hostctl unblock-marked /etc/hosts
+
+  BLOCK_USER: |
+    pkill -KILL -u$user
+    pkill -KILL startx
+    pkill -KILL xinit
+    pkill -KILL Xorg
+
+  UNBLOCK_USER: |
+    echo
+
+  BLOCK_ADMIN: |
+    pkill -KILL '^su$'
+    pkill -KILL '^sudo$'
+    test -f /etc/sudoers.d/$user && unlink /etc/sudoers.d/$user
+
+  UNBLOCK_ADMIN: |
+    grep -q $user /etc/sudoers.d/$user || \
+    echo '$user ALL=(ALL:ALL) NOPASSWD:ALL' > /etc/sudoers.d/$user
+
+  LOCK_USER_SCREEN: |
+    pgrep -uroot slock || for i in 0 $(seq 10)
+    do 
+      DISPLAY=:$i sudo -uroot slock
+    done
+
+  UNLOCK_USER_SCREEN: |
+    pgrep -uroot slock && kill -KILL $(pgrep -uroot slock)
