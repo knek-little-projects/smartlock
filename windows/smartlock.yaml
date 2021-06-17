@@ -1,9 +1,10 @@
 timezone: +3
 
 is_activity_allowed_url: http://pkradius.ru:12345/check-allowed/activity
+# is_activity_allowed_url: null
 
 allowed_activity_periods:
-  - 04:00 23:00
+  - 04:00 14:00
 
 danger_periods:
   - 14:00 23:00
@@ -23,8 +24,8 @@ allow_all_periods: null
 
 env:
   
-  user: x
-  admin: x
+  user: qwe
+  admin: admin
 
   disallow_hosts: |
     instagram.com
@@ -132,11 +133,10 @@ env:
     C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
     C:\Windows\explorer.exe
     C:\Windows\System32\dwm.exe
-    C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
     C:\procexp\procexp\PROCEXP64.exe
     C:\procexp\procexp\procexp.exe
     C:\Windows\System32\conhost.exe
-    C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+    C:\Program Files\Google\Chrome\Application\chrome.exe
     C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
     C:\Windows\System32\taskhost.exe
     C:\Windows\System32\hkcmd.exe
@@ -168,22 +168,25 @@ env:
     JetBrains
     Jet Brains
 
+shell: cmd.exe
+shell_encoding: cp866
 commands:
 
   BLOCK_ACTIVITIES: |
-    echo %disallow_hosts% | smartlock-hostctl block "C:\Windows\System32\drivers\etc\hosts"
-    echo %exe_cname_whitelist% > %tmp%\exe_cname_whitelist.txt
-    echo %exe_path_whitelist% > %tmp%\exe_path_whitelist.txt
-    smartlock-pkill --cname-whitelist=%tmp%\exe_cname_whitelist.txt --path-whitelist=%tmp%\exe_path_whitelist.txt
+    cd %SMARTLOCK_PATH%
+    python -c "import os; print(os.environ['disallow_hosts'])" | python smartlock-hostctl block "C:\Windows\System32\drivers\etc\hosts"
+    python -c "import os; from utils.ps import ps_filter_kill; ps_filter_kill(os.environ['exe_path_whitelist'].splitlines(), os.environ['exe_cname_whitelist'].splitlines())"
 
   UNBLOCK_ACTIVITIES: |
-    smartlock-hostctl unblock-marked "C:\Windows\System32\drivers\etc\hosts"
+    cd %SMARTLOCK_PATH%
+    python smartlock-hostctl unblock-marked "C:\Windows\System32\drivers\etc\hosts"
 
   BLOCK_USER: |
     net user %user% %random%
-    schtasks /Run /TN "smartlock-lock-user-screen"
+    schtasks /Run /TN "gotosleep-lock-screen"
 
   UNBLOCK_USER: |
+    echo Unlocking %user%
     net user %user% ""
 
   BLOCK_ADMIN: |
@@ -191,10 +194,11 @@ commands:
     schtasks /Run /TN "smartlock-lock-admin-screen"
 
   UNBLOCK_ADMIN: |
+    echo Unlocking %admin%
     net user %admin% ""
 
   LOCK_USER_SCREEN: |
-    schtasks /Run /TN "smartlock-lock-user-screen"
+    schtasks /Run /TN "gotosleep-lock-screen"
 
   UNLOCK_USER_SCREEN: |
     echo

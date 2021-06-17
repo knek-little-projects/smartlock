@@ -1,33 +1,28 @@
 from typing import *
+from subprocess import Popen, PIPE, STDOUT
 import subprocess
+import os
 
 
 class Executor:
-    def __init__(self, dry_run: bool = False, env: Optional[Dict[str, str]] = None):
+    def __init__(self, shell, *, dry_run: bool = False, env: Optional[Dict[str, str]] = None, encoding="UTF-8"):
+        self.shell = shell
         self.dry_run = dry_run
-        self.env = env
+        self.env = env or {}
+        self.encoding = encoding
 
-    def execute(self, cmd: str):
-        """
-        >>> e = Executor(dry_run=True, env=dict(user='x'))
-        >>> retcode = e.execute("qwe $user")
-        qwe x
-        >>> retcode
-        0
-        >>> e = Executor(dry_run=False, env=dict(user='x'))
-        >>> e.execute("echo qwe $user")
-        0
-        >>>  
-        """
+    def execute(self, input: bytes) -> bytes:
+        if self.dry_run:
+            return input
+
         env = self.env or {}
 
-        if self.dry_run:
+        p = Popen(self.shell, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, env=env)
+        p.stdin.write(input)
+        p.stdin.write(b'\n')
+        output, _ = p.communicate()
+        
+        return output
 
-            for key, val in env.items():
-                cmd = cmd.replace("$%s" % key, val)
-
-            print(cmd)
-            return 0
-
-        else:
-            return subprocess.call(cmd, shell=True, env=env)
+    def print_exec(self, cmd: str):
+        print(self.execute(cmd.encode(self.encoding)).decode(self.encoding))

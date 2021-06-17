@@ -1,12 +1,14 @@
 #!/usr/bin/env python3.8
 """
 Usage:
-    smartlock <config_file> [--dry-run] [-R] [--time=TIME]
+    smartlock <config_file> [-A=ACTION] [--dry-run] [-R] [--time=TIME] [options]
 
 Options:
     -s --dry-run
     -t --time=TIME
     -R --remote-time
+    -A --action=ACTION
+    -L --list-actions
 """
 from typing import *
 from utils.executor import Executor
@@ -15,12 +17,15 @@ from utils.config import Config
 from utils.remote_time import get_remote_utc_datetime
 from docopt import docopt
 import datetime as dt
+import os
 import logging
 import yaml
 import requests
 
 
-def is_activity_positive(url):
+def is_activity_positive(url: Optional[str]) -> Optional[bool]:
+    if not url:
+        return None
     try:
         return requests.get(url).json()
     except:
@@ -43,15 +48,23 @@ def get_now(timezone, use_remote: Optional[bool], parse_time: Optional[str]):
     return now
 
 
-def main():
+def main(args):
+    if args["--list-actions"]:
+        print("\n".join(action.name for action in Action))
+        return
+
     logging.basicConfig(level=logging.DEBUG)
 
-    args = docopt(__doc__)
     config = Config.parse_file(args["<config_file>"])
-    exe = Executor(dry_run=args["--dry-run"], env=config.env)
+    env = {**os.environ, **config.env, "SMARTLOCK_PATH": os.path.dirname(os.path.abspath(__file__))}
+    exe = Executor(config.shell, encoding=config.shell_encoding, dry_run=args["--dry-run"], env=env)
 
     now = get_now(config.timezone, use_remote=args["--remote-time"], parse_time=args["--time"])
     logging.debug("Now is %s" % now)
+
+    if args["--action"]:
+        exe.print_exec(config.commands[args["--action"]])
+        return
 
     actions = compute_actions(
         now,
@@ -65,8 +78,8 @@ def main():
     logging.debug(" ".join(action.name for action in actions))
 
     for action in actions:
-        exe.execute(config.commands[action.name])
+        exe.print_exec(config.commands[action.name])
 
 
 if __name__ == "__main__":
-    main()
+    main(docopt(__doc__))

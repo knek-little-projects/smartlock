@@ -47,3 +47,7 @@ def ps_filter(exe_path_wl: List[str], exe_cname_wl: List[str]) -> Iterator[psuti
 
         except OSError:
             continue
+
+def ps_filter_kill(*args):
+    for p in ps_filter(*args):
+        p.kill()

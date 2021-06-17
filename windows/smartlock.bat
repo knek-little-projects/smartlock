@@ -2,8 +2,9 @@
 
 rem echo > smartlock.log
 
-FOR /L %%i IN (1,1,60) DO (
-	smartlock.py
+cd ..
+FOR /L %%i IN (1,1,20) DO (
+	python smartlock windows\smartlock.yaml -R
 	rem  >> smartlock.log 2>&1
-	timeout 1 > NUL
+	timeout 3 > NUL
 )

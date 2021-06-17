@@ -8,6 +8,8 @@ import yaml
 
 @dataclass
 class Config:
+    shell: str
+    shell_encoding: str
     env: Dict[str, str]
     commands: Dict[Action, str]
     timezone: dt.timezone
@@ -22,6 +24,8 @@ class Config:
     def parse_yaml(cls, text):
         data = yaml.safe_load(text)
         return Config(
+            shell=data.get("shell", "/bin/sh"),
+            shell_encoding=data.get("shell_encoding", "UTF-8"),
             env=data["env"],
             commands=data["commands"],
             is_activity_allowed_url=data["is_activity_allowed_url"],
