@@ -175,12 +175,12 @@ commands:
 
   BLOCK_ACTIVITIES: |
     cd %SMARTLOCK_PATH%
-    python -c "import os; print(os.environ['disallow_hosts'])" | python smartlock-hostctl block "C:\Windows\System32\drivers\etc\hosts"
+    python -c "import os; print(os.environ['disallow_hosts'])" | python smartlock-hostctl.py block "C:\Windows\System32\drivers\etc\hosts"
     python -c "import os; from utils.ps import ps_filter_kill; ps_filter_kill(os.environ['exe_path_whitelist'].splitlines(), os.environ['exe_cname_whitelist'].splitlines())"
 
   UNBLOCK_ACTIVITIES: |
     cd %SMARTLOCK_PATH%
-    python smartlock-hostctl unblock-marked "C:\Windows\System32\drivers\etc\hosts"
+    python smartlock-hostctl.py unblock-marked "C:\Windows\System32\drivers\etc\hosts"
 
   BLOCK_USER: |
     net user %user% %random%
