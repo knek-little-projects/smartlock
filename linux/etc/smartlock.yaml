@@ -26,6 +26,7 @@ env:
   user: x
 
   disallow_hosts: |
+    themonsterunderthebed.net
     instagram.com
     www.instagram.com
     twitter.com

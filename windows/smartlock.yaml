@@ -28,6 +28,7 @@ env:
   admin: admin
 
   disallow_hosts: |
+    themonsterunderthebed.net
     instagram.com
     www.instagram.com
     twitter.com
