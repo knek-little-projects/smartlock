@@ -3,13 +3,13 @@ timezone: +3
 is_activity_allowed_url: http://pkradius.ru:12345/check-allowed/activity
 
 allowed_activity_periods:
-  - 04:00 23:00
+  - 04:00 12:00
 
 danger_periods:
   - 14:00 23:00
 
 critical_periods:
-  - 23:00 04:00
+  - 23:00 03:00
 
 dinner_periods:
   - 10:00 10:01

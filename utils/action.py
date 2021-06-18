@@ -32,38 +32,38 @@ BLOCK_ALL = [
 
 def _is_activity_allowed(
     now: Datetime,
-    is_activity_positive: Optional[int],
-    allowed_periods: Optional[List[Period]]
+    is_activity_positive: Optional[int] = None,
+    allowed_periods: Optional[List[Period]] = None,
 ):
     """
     >>> allowed_time = Datetime(10, 10, 10)
     >>> allowed_periods = [DatetimePeriod(Datetime(1,1,1), Datetime(11,11,11))]
     >>> allowed_time in allowed_periods[0]
     True
-    >>> _is_activity_allowed(allowed_time, None, None)
+    >>> _is_activity_allowed(allowed_time)
     True
-    >>> _is_activity_allowed(allowed_time, True, None)
+    >>> _is_activity_allowed(allowed_time, True)
     True
-    >>> _is_activity_allowed(allowed_time, False, None)
+    >>> _is_activity_allowed(allowed_time, False)
     False
     >>> _is_activity_allowed(allowed_time, True, allowed_periods)
     True
     >>> _is_activity_allowed(allowed_time, False, allowed_periods)
-    False
+    True
     >>> _is_activity_allowed(allowed_time, None, allowed_periods)
     True
-    >>> disallowed_time = Datetime(12, 12, 12)
-    >>> disallowed_time in allowed_periods[0]
+    >>> other_time = Datetime(12, 12, 12)
+    >>> other_time in allowed_periods[0]
     False
-    >>> _is_activity_allowed(disallowed_time, True, allowed_periods)
-    False
-    >>> _is_activity_allowed(disallowed_time, False, allowed_periods)
+    >>> _is_activity_allowed(other_time, True, allowed_periods)
+    True
+    >>> _is_activity_allowed(other_time, False, allowed_periods)
     False
     >>> 
     """
     if allowed_periods is not None:
-        if not any(now in period for period in allowed_periods):
-            return False
+        if any(now in period for period in allowed_periods):
+            return True
 
     if is_activity_positive is not None:
         return is_activity_positive

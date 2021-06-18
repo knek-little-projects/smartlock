@@ -25,4 +25,18 @@ class Executor:
         return output
 
     def print_exec(self, cmd: str):
+        """
+        >>> e = Executor("/bin/sh", dry_run=False, env={"user": "qwerty"})
+        >>> e.print_exec("echo 1\\necho 2\\necho $user")
+        1
+        2
+        qwerty
+        <BLANKLINE>
+        >>> e.dry_run = True
+        >>> e.print_exec("echo 1\\necho 2\\necho 3")
+        echo 1
+        echo 2
+        echo 3
+        >>> 
+        """
         print(self.execute(cmd.encode(self.encoding)).decode(self.encoding))
