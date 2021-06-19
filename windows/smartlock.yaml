@@ -25,7 +25,7 @@ allow_all_periods: null
 env:
   user: qwe
   admin: admin
-  unlock_activities_flag: C:\smartlock_unlock_activities.flag
+  unlock_activities_flag: C:\smartlock.flags\unlock_activities
 
   disallow_hosts: |
     themonsterunderthebed.net
