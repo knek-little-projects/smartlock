@@ -23,9 +23,9 @@ dinner_periods:
 allow_all_periods: null
 
 env:
-  
   user: qwe
   admin: admin
+  unlock_activities_flag: C:\smartlock_unlock_activities.flag
 
   disallow_hosts: |
     themonsterunderthebed.net
@@ -172,15 +172,13 @@ env:
 shell: cmd.exe
 shell_encoding: cp866
 commands:
-
   BLOCK_ACTIVITIES: |
-    cd %SMARTLOCK_PATH%
-    python -c "import os; print(os.environ['disallow_hosts'])" | python smartlock-hostctl.py block "C:\Windows\System32\drivers\etc\hosts"
-    python -c "import os; from utils.ps import ps_filter_kill; ps_filter_kill(os.environ['exe_path_whitelist'].splitlines(), os.environ['exe_cname_whitelist'].splitlines())"
+    python windows\block_activities.py
 
   UNBLOCK_ACTIVITIES: |
     cd %SMARTLOCK_PATH%
     python smartlock-hostctl.py unblock-marked "C:\Windows\System32\drivers\etc\hosts"
+    echo > %unlock_activities_flag%
 
   BLOCK_USER: |
     net user %user% %random%
