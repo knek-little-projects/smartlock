@@ -10,7 +10,7 @@ def ps_info(exe, prop) -> bytes:
     completed = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
     return completed.stdout
 
-def ps_filter(exe_path_wl: List[str], exe_cname_wl: List[str]) -> Iterator[psutil.Process]:
+def ps_filter_wl(exe_path_wl: List[str], exe_cname_wl: List[str]) -> Iterator[psutil.Process]:
     allow_instances = {exe.strip() for exe in exe_path_wl if exe}
     allow_companies = {cname.strip().encode() for cname in exe_cname_wl if cname}
 
@@ -48,6 +48,28 @@ def ps_filter(exe_path_wl: List[str], exe_cname_wl: List[str]) -> Iterator[psuti
         except OSError:
             continue
 
-def ps_filter_kill(*args):
-    for p in ps_filter(*args):
-        p.kill()
+
+def ps_filter_by(name):
+    for p in psutil.pids():
+        try:
+            p = psutil.Process(p)
+            if name.lower() in p.name().lower():
+                yield p
+
+        except psutil.AccessDenied:
+            continue
+
+        except psutil.NoSuchProcess:
+            continue
+
+        except OSError:
+            continue
+
+
+def killall(processes: Iterator[psutil.Process]):
+    for p in processes:
+        try:
+            p.kill()
+        except Exception as e:
+            logging.error(e)
+            continue
