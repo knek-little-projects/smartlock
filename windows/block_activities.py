@@ -1,3 +1,7 @@
+###################
+# BLOCK /etc/hosts
+###################
+
 import sys
 import os
 sys.path.insert(0, os.environ["SMARTLOCK_PATH"])
@@ -7,12 +11,27 @@ LIST = os.environ['disallow_hosts'].splitlines()
 PATH = r"C:\Windows\System32\drivers\etc\hosts"
 HostsFile(PATH).block(LIST)
 
-from utils.ps import ps_filter_wl, ps_filter_by, killall
-PATH = os.environ['exe_path_whitelist'].splitlines()
-CNAME = os.environ['exe_cname_whitelist'].splitlines()
-killall(ps_filter_wl(PATH, CNAME))
+###################
+# KILL PROCESSES
+###################
 
-UNLOCK_FLAG = os.environ["unlock_activities_flag"]
-if os.path.isfile(UNLOCK_FLAG):
-    os.unlink(UNLOCK_FLAG)
-    killall(ps_filter_by("chrome.exe"))
+from utils.ps import ps_bw_filter, killall
+
+user = os.environ['user'].strip()
+cname_bl = os.environ['cname_bl'].splitlines()
+name_bl = os.environ['name_bl'].splitlines()
+hash_bl = os.environ['hash_bl'].splitlines()
+path_wl = os.environ['path_wl'].splitlines()
+
+unlock_activities_flag = os.environ["unlock_activities_flag"]
+if os.path.isfile(unlock_activities_flag):
+    os.unlink(unlock_activities_flag)
+    name_bl += os.environ['kill_on_activity_reblock'].splitlines()
+
+killall(ps_bw_filter(
+    user=user,
+    path_wl=path_wl,
+    name_bl=name_bl,
+    cname_bl=cname_bl,
+    hash_bl=hash_bl,
+))

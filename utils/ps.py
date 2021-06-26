@@ -1,5 +1,7 @@
 #!python3.8
 from typing import *
+from psutil import Process
+from utils.headhash import headhash
 import psutil
 import logging
 import subprocess
@@ -10,51 +12,57 @@ def ps_info(exe, prop) -> bytes:
     completed = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
     return completed.stdout
 
-def ps_filter_wl(exe_path_wl: List[str], exe_cname_wl: List[str]) -> Iterator[psutil.Process]:
-    allow_instances = {exe.strip() for exe in exe_path_wl if exe}
-    allow_companies = {cname.strip().encode() for cname in exe_cname_wl if cname}
+
+def _transform_user_name(s):
+    s = s.strip()
+
+    if '\\' in s:
+        s = s.split('\\')[-1]
+
+    return s.lower()
+
+
+def is_user_eq(a, b):
+    return _transform_user_name(a) == _transform_user_name(b)
+
+
+def ps_bw_filter(
+        user: str,
+        path_wl: List[str], 
+        name_bl: List[str],
+        cname_bl: List[str],
+        hash_bl: List[str],
+    ) -> Iterator[Process]:
+
+    path_wl = {path.strip().lower() for path in path_wl}
+    name_bl = {name.strip().lower() for name in name_bl}
+    cname_bl = {cname.strip().encode() for cname in cname_bl}
 
     for p in psutil.pids():
         try:
-            p = psutil.Process(p)
-            logging.debug("PSUTIL %s" % p.exe())
+            p = Process(p)
 
-            if p.username() != 'qwe-ПК\\qwe':
-                logging.debug("PSUTIL SKIP Username outside of scope")
-                continue
-
-            if p.exe() in allow_instances:
-                logging.debug("PSUTIL SKIP Allowed instance")
+            if not is_user_eq(p.username(), user):
                 continue
 
             if not p.exe():
-                logging.debug("PSUTIL SKIP None exe")
                 continue
 
-            cname = ps_info(p.exe(), 'CompanyName')
-            if any(allowed_substr in cname for allowed_substr in allow_companies):
-                logging.debug("PSUTIL SKIP Allowed cname: %s" % cname)
+            if p.exe().lower() in path_wl:
                 continue
 
-            logging.info("MATCH %s" % p.exe())
-            yield p
-
-        except psutil.AccessDenied:
-            continue
-
-        except psutil.NoSuchProcess:
-            continue
-
-        except OSError:
-            continue
-
-
-def ps_filter_by(name):
-    for p in psutil.pids():
-        try:
-            p = psutil.Process(p)
-            if name.lower() in p.name().lower():
+            if p.name().lower() in name_bl:
                 yield p
+                continue
+
+            if headhash(p.exe()) in hash_bl:
+                yield p
+                continue
+
+            cname = ps_info(p.exe(), 'CompanyName').strip()
+            if cname in cname_bl:
+                yield p
+                continue
 
         except psutil.AccessDenied:
             continue
@@ -66,9 +74,10 @@ def ps_filter_by(name):
             continue
 
 
-def killall(processes: Iterator[psutil.Process]):
+def killall(processes: Iterator[Process]):
     for p in processes:
         try:
+            print("KILL", p.exe())
             p.kill()
         except Exception as e:
             logging.error(e)

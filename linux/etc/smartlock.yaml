@@ -6,7 +6,7 @@ allowed_activity_periods:
   - 04:00 12:00
 
 danger_periods:
-  - 14:00 23:00
+  - 03:00 23:00
 
 critical_periods:
   - 23:00 03:00
