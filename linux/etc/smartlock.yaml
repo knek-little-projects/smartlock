@@ -3,7 +3,7 @@ timezone: +3
 is_activity_allowed_url: http://pkradius.ru:12345/check-allowed/activity
 
 allowed_activity_periods:
-  - 04:00 12:00
+  - 09:30 10:00
 
 danger_periods:
   - 03:00 23:00
@@ -26,6 +26,13 @@ env:
   unblock_activities_flag: /tmp/unlock_activity.flag
 
   disallow_hosts: |
+    www.hdseason.ru
+    hdseason.ru
+    lenta.ru
+    tvrain.ru
+    meduza.io
+    www.lenta.ru
+    zona.media
     instagram.com
     www.instagram.com
     twitter.com
