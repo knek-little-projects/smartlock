@@ -7,6 +7,16 @@ flags:
 
 rules:
 
+- name: Check TERC Failsafe
+  type: url
+  url: http://pkradius.ru/static/failsafe.txt
+  matches:
+  - type: success
+    applies:
+    - type: action
+      action: FAILSAFE
+    - type: break
+
 - name: Check TERC online
   type: url
   url: http://pkradius.ru:12345/check-allowed/activity

@@ -20,6 +20,10 @@ class ApplyAction(Apply):
         self.action = action
 
 
+class ApplyBreak(Apply):
+    pass
+
+
 def parse_apply(data: Dict[str, Any]) -> Apply:
     data = dict(data)
     return globals()['Apply' + data.pop("type").capitalize()](**data)
