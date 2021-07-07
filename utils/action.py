@@ -18,4 +18,4 @@ def compute_actions(now: Datetime, flags: Dict[str, Any], rules: List[Rule]) -> 
                 return
 
             else:
-                raise Exception("Apply %s wasn't handled" % type(apply)) 
+                raise Exception("Apply %s wasn't handled" % type(apply))
