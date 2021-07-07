@@ -1,3 +1,3 @@
 #!/bin/sh
 cd /root/smartlock
-python3.8 smartlock.py linux/etc/smartlock.yaml "$@"
+cat config.d/* linux/config.d/* | python3.8 smartlock.py "$@"
