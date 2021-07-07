@@ -95,7 +95,7 @@ rules:
     value: false
     applies:
     - type: action
-      action: UNLBOCK_ACTIVITIES
+      action: UNBLOCK_ACTIVITIES
 - type: flag
   flag: lockUser
   matches:

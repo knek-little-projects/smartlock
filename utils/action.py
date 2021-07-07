@@ -3,11 +3,16 @@ from enum import Enum, auto
 from utils.period import Period, DatetimePeriod, TimePeriod, Time, Datetime  # for doc tests
 from utils.rules import Rule, ApplyFlag, ApplyAction, ApplyBreak
 import requests
+import logging
 
 
 def compute_actions(now: Datetime, flags: Dict[str, Any], rules: List[Rule]) -> Iterator[str]:
     for rule in rules:
+        logging.debug(rule)
+        
         for apply in rule.applies(rule.get_value(now=now, flags=flags)):
+            logging.debug(apply)
+            
             if isinstance(apply, ApplyFlag):
                 flags[apply.flag] = apply.value
 

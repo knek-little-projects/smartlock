@@ -29,8 +29,8 @@ def parse_apply(data: Dict[str, Any]) -> Apply:
     return globals()['Apply' + data.pop("type").capitalize()](**data)
 
 
-def parse_applies(items: List[Dict[str, Any]]) -> Iterator[Apply]:
-    return map(parse_apply, items)
+def parse_applies(items: List[Dict[str, Any]]) -> List[Apply]:
+    return list(map(parse_apply, items))
 
 
 class Match(ABC):
@@ -71,14 +71,17 @@ def parse_match(data: Dict[str, Any]) -> Match:
     return globals()['Match' + data.pop("type").capitalize()].parse(data)
 
 
-def parse_matches(items) -> Iterator[Match]:
-    return map(parse_match, items)
+def parse_matches(items) -> List[Match]:
+    return list(map(parse_match, items))
 
 
 class Rule(ABC):
     def __init__(self, matches: List[Match], name: Optional[str] = None):
         self.matches = matches
         self.name = name
+
+    def __repr__(self):
+        return "Rule(name=%s)" % self.name
 
     def applies(self, value) -> Iterator[Apply]:
         for match in self.matches:
@@ -137,5 +140,5 @@ def parse_rule(data: dict) -> Rule:
     return globals()['Rule' + data.pop("type").capitalize()].parse(data)
 
 
-def parse_rules(items) -> Iterator[Rule]:
-    return map(parse_rule, items)
+def parse_rules(items) -> List[Rule]:
+    return list(map(parse_rule, items))

@@ -80,5 +80,5 @@ class DatetimePeriod(Period):
         return self.start < datetime < self.end
 
 
-def parse_time_periods(periods):
+def parse_time_periods(periods) -> Optional[List[TimePeriod]]:
     return [TimePeriod.parse(p) for p in periods] if periods is not None else None

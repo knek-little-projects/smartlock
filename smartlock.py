@@ -39,7 +39,7 @@ def read_config(path: Optional[str]) -> Config:
 
 def main(args):
     logging.basicConfig(level=getattr(logging, args["--log-level"] or "INFO"))
-        
+
     config = read_config(args.get("--config"))
     env = {**os.environ, **config.global_env, **config.env, "SMARTLOCK_PATH": os.path.dirname(os.path.abspath(__file__))}
     exe = Executor(config.shell, encoding=config.shell_encoding, dry_run=args["--dry-run"], env=env)
@@ -57,17 +57,19 @@ def main(args):
             flags=config.flags,
             rules=config.rules,
         ))
+
+        if args["--list-actions"]:
+            print("\n".join(actions))
+            return
+
+        for action in actions:
+            exe.print_exec(config.actions[action])
+
     except Exception as e:
-        logging.error("FAILSAFE")
-        exe.print_exec(config.actions['FAILSAFE'])
+        logging.critical(e)
+        logging.warn("Running FAILSAFE!")
+        exe.print_exec(config.failsafe)
         raise e
-
-    if args["--list-actions"]:
-        print("\n".join(actions))
-        return
-
-    for action in actions:
-        exe.print_exec(config.actions[action])
 
 
 if __name__ == "__main__":
