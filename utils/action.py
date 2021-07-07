@@ -1,145 +1,18 @@
 from typing import *
 from enum import Enum, auto
-from utils.period import Period
-from utils.period import DatetimePeriod, TimePeriod, Time, Datetime  # for doc tests
+from utils.period import Period, DatetimePeriod, TimePeriod, Time, Datetime  # for doc tests
+from utils.rules import Rule, ApplyFlag, ApplyAction
+import requests
 
 
-class Action(Enum):
-    BLOCK_USER = auto()
-    BLOCK_ADMIN = auto()
-    BLOCK_ACTIVITIES = auto()
-    UNBLOCK_USER = auto()
-    UNBLOCK_ADMIN = auto()
-    UNBLOCK_ACTIVITIES = auto()
-    LOCK_USER_SCREEN = auto()
-    UNLOCK_USER_SCREEN = auto()
+def compute_actions(now: Datetime, flags: Dict[str, Any], rules: List[Rule]) -> Iterator[str]:
+    for rule in rules:
+        for apply in rule.applies(rule.get_value(now=now, flags=flags)):
+            if isinstance(apply, ApplyFlag):
+                flags[apply.flag] = apply.value
 
+            elif isinstance(apply, ApplyAction):
+                yield apply.action
 
-ALLOW_ALL = [
-    Action.UNBLOCK_USER,
-    Action.UNBLOCK_ADMIN,
-    Action.UNBLOCK_ACTIVITIES,
-    Action.UNLOCK_USER_SCREEN,
-]
-
-BLOCK_ALL = [
-    Action.BLOCK_USER,
-    Action.BLOCK_ADMIN,
-    Action.BLOCK_ACTIVITIES,
-    Action.LOCK_USER_SCREEN,
-]
-
-
-def _is_activity_allowed(
-    now: Datetime,
-    is_activity_positive: Optional[int] = None,
-    allowed_periods: Optional[List[Period]] = None,
-):
-    """
-    >>> allowed_time = Datetime(10, 10, 10)
-    >>> allowed_periods = [DatetimePeriod(Datetime(1,1,1), Datetime(11,11,11))]
-    >>> allowed_time in allowed_periods[0]
-    True
-    >>> _is_activity_allowed(allowed_time)
-    True
-    >>> _is_activity_allowed(allowed_time, True)
-    True
-    >>> _is_activity_allowed(allowed_time, False)
-    False
-    >>> _is_activity_allowed(allowed_time, True, allowed_periods)
-    True
-    >>> _is_activity_allowed(allowed_time, False, allowed_periods)
-    True
-    >>> _is_activity_allowed(allowed_time, None, allowed_periods)
-    True
-    >>> other_time = Datetime(12, 12, 12)
-    >>> other_time in allowed_periods[0]
-    False
-    >>> _is_activity_allowed(other_time, True, allowed_periods)
-    True
-    >>> _is_activity_allowed(other_time, False, allowed_periods)
-    False
-    >>> 
-    """
-    if allowed_periods is not None:
-        if any(now in period for period in allowed_periods):
-            return True
-
-    if is_activity_positive is not None:
-        return is_activity_positive
-
-    return True
-
-
-def compute_actions(
-    now: Datetime,
-    is_activity_positive: Optional[bool] = None,
-    allowed_activity_periods: Optional[List[Period]] = None,
-    danger_periods: Optional[List[Period]] = None,
-    critical_periods: Optional[List[Period]] = None,
-    allow_all_periods: Optional[List[Period]] = None,
-    dinner_periods: Optional[List[Period]] = None,
-) -> List[Action]:
-    """
-    >>> def P(actions):
-    ...   print(" ".join(action.name for action in actions))
-    ...
-
-    >>> allow_all_periods = [DatetimePeriod(Datetime(1, 1, 1), Datetime(11, 11, 11))]
-    >>> P(compute_actions(Datetime(5, 5, 5), allow_all_periods=allow_all_periods))
-    UNBLOCK_USER UNBLOCK_ADMIN UNBLOCK_ACTIVITIES UNLOCK_USER_SCREEN
-
-    >>> P(compute_actions(Datetime(5, 5, 5)))
-    UNBLOCK_ACTIVITIES UNBLOCK_ADMIN UNBLOCK_USER UNLOCK_USER_SCREEN
-
-    >>> danger_periods = [TimePeriod(Time(14), Time(1))]
-    >>> P(compute_actions(Datetime(5, 5, 5, 10), danger_periods=danger_periods))
-    UNBLOCK_ACTIVITIES UNBLOCK_ADMIN UNBLOCK_USER UNLOCK_USER_SCREEN
-    
-    >>> P(compute_actions(Datetime(5, 5, 5, 0, 30), danger_periods=danger_periods))
-    UNBLOCK_ACTIVITIES BLOCK_ADMIN UNBLOCK_USER UNLOCK_USER_SCREEN
-
-    >>> critical_periods = [TimePeriod(Time(1), Time(4))]
-    >>> P(compute_actions(Datetime(5, 5, 5, 10, 0), danger_periods=danger_periods, critical_periods=critical_periods))
-    UNBLOCK_ACTIVITIES UNBLOCK_ADMIN UNBLOCK_USER UNLOCK_USER_SCREEN
-    
-    >>> P(compute_actions(Datetime(5, 5, 5, 0, 0), danger_periods=danger_periods, critical_periods=critical_periods))
-    UNBLOCK_ACTIVITIES BLOCK_ADMIN UNBLOCK_USER UNLOCK_USER_SCREEN
-    
-    >>> compute_actions(Datetime(5, 5, 5, 1, 30), danger_periods=danger_periods, critical_periods=critical_periods) == BLOCK_ALL
-    True
-    
-    >>> 
-    """
-
-    if now is None:
-        return BLOCK_ALL
-
-    if allow_all_periods is not None:
-        if any(now in period for period in allow_all_periods):
-            return ALLOW_ALL
-
-    actions = []
-
-    if _is_activity_allowed(now, is_activity_positive, allowed_activity_periods):
-        actions.append(Action.UNBLOCK_ACTIVITIES)
-    else:
-        actions.append(Action.BLOCK_ACTIVITIES)
-
-    if any(now in period for period in critical_periods or []):
-        return BLOCK_ALL
-
-    elif any(now in period for period in danger_periods or []):
-        actions.append(Action.BLOCK_ADMIN)
-        actions.append(Action.UNBLOCK_USER)
-
-    else:
-        actions.append(Action.UNBLOCK_ADMIN)
-        actions.append(Action.UNBLOCK_USER)
-
-    if any(now in period for period in dinner_periods or []):
-        actions.append(Action.LOCK_USER_SCREEN)
-    else:
-        actions.append(Action.UNLOCK_USER_SCREEN)
-
-    return actions
+            else:
+                raise Exception("Apply %s wasn't handled" % type(apply)) 

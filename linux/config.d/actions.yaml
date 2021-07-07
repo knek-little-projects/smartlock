@@ -1,0 +1,63 @@
+env:
+  user: x
+  unblock_activities_flag: /tmp/unlock_activity.flag
+  disallow_exe: |
+    telegram
+
+actions:
+
+  BLOCK_ACTIVITIES: |
+    echo $disallow_hosts | python3.8 smartlock-hostctl.py block /etc/hosts
+    echo $disallow_exe | xargs -n1 pkill -KILL
+    if test -f $unblock_activities_flag
+    then
+      pkill -KILL chrome
+      pkill -KILL google-chrome
+      pkill -KILL firefox
+      unlink $unblock_activities_flag
+    fi
+
+  UNBLOCK_ACTIVITIES: |
+    python3.8 smartlock-hostctl.py unblock-marked /etc/hosts
+    touch $unblock_activities_flag
+
+  BLOCK_USER: |
+    pkill -KILL -u$user
+    pkill -KILL startx
+    pkill -KILL xinit
+    pkill -KILL Xorg
+
+  UNBLOCK_USER: |
+    echo
+
+  BLOCK_ADMIN: |
+    pkill -KILL '^su$'
+    pkill -KILL '^sudo$'
+    test -f /etc/sudoers.d/$user && unlink /etc/sudoers.d/$user
+
+  UNBLOCK_ADMIN: |
+    grep -q $user /etc/sudoers.d/$user || \
+    echo "$user ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
+
+  BLOCK_SCREEN: |
+    pgrep -uroot slock || for i in 0 $(seq 10)
+    do 
+      echo LOCKING SCREEN $i
+      DISPLAY=:$i sudo -uroot slock &
+    done
+
+  UNBLOCK_SCREEN: |
+    echo UNLOCKING SCREEN
+    pgrep -uroot slock && kill -KILL $(pgrep -uroot slock)
+
+  BLOCK_SYSTEM2: |
+    passwd --status system2 | cut -f2 -d' ' | grep L || passwd --lock system2
+
+  UNBLOCK_SYSTEM2: |
+    passwd --unlock system2 | cut -f2 -d' ' | grep P || passwd --unlock system2
+
+  FAILSAFE: |
+    passwd --unlock system2
+    grep -q $user /etc/sudoers.d/$user || \
+    echo "$user ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
+    pgrep -uroot slock && kill -KILL $(pgrep -uroot slock)

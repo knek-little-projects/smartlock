@@ -1,0 +1,89 @@
+shell: cmd.exe
+shell_encoding: cp866
+
+env:
+  user: qwe
+  admin: admin
+  unlock_activities_flag: C:\smartlock.flags\unlock_activities
+
+  path_wl: |
+    C:\Program Files (x86)\Cura_14.07\python\pythonw.exe
+    C:\Program Files\Ultimaker Cura 4.8.0\CuraEngine.exe
+    C:\Program Files\Ultimaker Cura 4.8.0\Cura.exe
+    C:\Program Files\Python37\python.exe
+    C:\Program Files (x86)\SumatraPDF\SumatraPDF.exe
+    C:\Windows\System32\conhost.exe
+    C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+    C:\Windows\explorer.exe
+    C:\Windows\System32\dwm.exe
+    C:\procexp\procexp\PROCEXP64.exe
+    C:\procexp\procexp\procexp.exe
+    C:\Program Files\Google\Chrome\Application\chrome.exe
+    C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+    C:\Windows\System32\taskhost.exe
+    C:\Windows\System32\hkcmd.exe
+    C:\Program Files (x86)\Notepad++\notepad++.exe
+    C:\Program Files (x86)\DAEMON Tools Lite\DTLite.exe
+    C:\Windows\System32\igfxpers.exe
+    C:\Program Files\Android\Android Studio\bin\fsnotifier64.exe
+    C:\Windows\System32\cmd.exe
+    C:\Program Files\Android\Android Studio\jre\bin\java.exe
+
+  name_bl: |
+    tankrace.exe
+
+  cname_bl: |
+    Telegram FZ-LLC
+    Telegram Desktop
+
+  hash_bl: |
+    # tankracer
+    9d20037ac9554bf1b5546310379367aa
+
+  disallow_path: ""
+
+  kill_on_activity_reblock:
+    chrome.exe
+
+actions:
+
+  BLOCK_ACTIVITIES: |
+    python windows\block_activities.py
+
+  UNBLOCK_ACTIVITIES: |
+    cd %SMARTLOCK_PATH%
+    python smartlock-hostctl.py unblock-marked "C:\Windows\System32\drivers\etc\hosts"
+    echo > %unlock_activities_flag%
+
+  BLOCK_USER: |
+    net user %user% %random%
+    schtasks /Run /TN "gotosleep-lock-screen"
+
+  UNBLOCK_USER: |
+    echo Unlocking %user%
+    net user %user% ""
+
+  BLOCK_ADMIN: |
+    net user %admin% %random%
+    schtasks /Run /TN "smartlock-lock-admin-screen"
+
+  UNBLOCK_ADMIN: |
+    echo Unlocking %admin%
+    net user %admin% ""
+
+  BLOCK_SCREEN: |
+    schtasks /Run /TN "gotosleep-lock-screen"
+
+  UNBLOCK_SCREEN: |
+    echo
+
+  BLOCK_SYSTEM2: |
+    net user system2 /active:no
+
+  UNBLOCK_SYSTEM2: |
+    net user system2 /active:yes
+
+  FAILSAFE: |
+    net user system2 /active:yes
+    net user %admin% ""
+    net user %user% ""

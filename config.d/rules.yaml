@@ -1,0 +1,129 @@
+flags:
+  lockAdmin: true
+  lockActivities: true
+  lockUser: false
+  lockScreen: false
+  lockSystem2: false
+
+rules:
+
+- name: Check TERC online
+  type: url
+  url: http://pkradius.ru:12345/check-allowed/activity
+  matches:
+  - type: value
+    value: true
+    applies:
+    - type: flag
+      flag: lockActivities
+      value: false
+
+- name: Dinner periods
+  type: periods
+  periods:
+  - 10:00 10:01
+  - 12:00 12:01
+  - 14:00 14:01
+  - 16:00 16:01
+  - 18:00 18:01
+  - 20:00 20:01
+  matches:
+  - type: value
+    value: true
+    applies:
+    - type: flag
+      flag: lockScreen
+      value: true
+
+- name: Allow computer use
+  type: periods
+  periods:
+  - 04:00 23:00
+  matches:
+  - type: value
+    value: false
+    applies:
+    - type: flag
+      flag: lockUser
+      value: true
+
+- name: Lock system2
+  type: periods
+  periods:
+  - 04:00 18:00
+  matches:
+  - type: value
+    value: false
+    applies:
+    - type: flag
+      flag: lockSystem2
+      value: true
+
+- type: flag
+  flag: lockAdmin
+  matches:
+  - type: value
+    value: true
+    applies:
+    - type: action
+      action: BLOCK_ADMIN
+  - type: value
+    value: false
+    applies:
+    - type: action
+      action: UNBLOCK_ADMIN
+
+- type: flag
+  flag: lockActivities
+  matches:
+  - type: value
+    value: true
+    applies:
+    - type: action
+      action: BLOCK_ACTIVITIES
+  - type: value
+    value: false
+    applies:
+    - type: action
+      action: UNLBOCK_ACTIVITIES
+- type: flag
+  flag: lockUser
+  matches:
+  - type: value
+    value: true
+    applies:
+    - type: action
+      action: BLOCK_USER
+  - type: value
+    value: false
+    applies:
+    - type: action
+      action: UNBLOCK_USER
+
+- type: flag
+  flag: lockScreen
+  matches:
+  - type: value
+    value: true
+    applies:
+    - type: action
+      action: BLOCK_SCREEN
+  - type: value
+    value: false
+    applies:
+    - type: action
+      action: UNBLOCK_SCREEN
+
+- type: flag
+  flag: lockSystem2
+  matches:
+  - type: value
+    value: true
+    applies:
+    - type: action
+      action: BLOCK_SYSTEM2
+  - type: value
+    value: false
+    applies:
+    - type: action
+      action: UNBLOCK_SYSTEM2
