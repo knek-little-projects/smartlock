@@ -50,10 +50,10 @@ actions:
     echo UNLOCKING SCREEN
     pgrep -uroot slock && kill -KILL $(pgrep -uroot slock)
 
-  BLOCK_SYSTEM2: |
+  BLOCK_FAILSAFE: |
     passwd --status system2 | cut -f2 -d' ' | grep L || passwd --lock system2
 
-  UNBLOCK_SYSTEM2: |
+  UNBLOCK_FAILSAFE: |
     passwd --unlock system2 | cut -f2 -d' ' | grep P || passwd --unlock system2
 
   FAILSAFE: |
