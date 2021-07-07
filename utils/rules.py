@@ -112,6 +112,15 @@ class RuleUrl(Rule):
             return e
 
 
+class RuleParam(Rule):
+    def __init__(self, param: str, matches, name=None):
+        super().__init__(matches, name)
+        self.param = param
+
+    def get_value(self, **params):
+        return params[self.param]
+
+
 class RulePeriods(Rule):
     def __init__(self, periods: List[TimePeriod], matches, name=None):
         super().__init__(matches, name)
@@ -125,6 +134,7 @@ class RulePeriods(Rule):
         data = dict(data)
         data["periods"] = parse_time_periods(data["periods"])
         return super().parse(data)
+
 
 class RuleFlag(Rule):
     def __init__(self, flag: str, *args, **kwargs):

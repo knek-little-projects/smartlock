@@ -3,7 +3,7 @@ flags:
   lockActivities: true
   lockUser: false
   lockScreen: false
-  lockSystem2: false
+  lockFailsafe: false
 
 rules:
 
@@ -15,6 +15,21 @@ rules:
     applies:
     - type: action
       action: FAILSAFE
+    - type: break
+
+- name: Ensure time is known
+  type: param
+  param: now
+  matches:
+  - type: value
+    value: null
+    applies:
+    - type: action
+      action: BLOCK_ADMIN
+    - type: action
+      action: BLOCK_USER
+    - type: action
+      action: BLOCK_FAILSAFE
     - type: break
 
 - name: Check TERC online
@@ -57,7 +72,7 @@ rules:
       flag: lockUser
       value: true
 
-- name: Lock system2
+- name: Lock failsafe
   type: periods
   periods:
   - 04:00 18:00
@@ -66,7 +81,7 @@ rules:
     value: false
     applies:
     - type: flag
-      flag: lockSystem2
+      flag: lockFailsafe
       value: true
 
 - type: flag
@@ -96,6 +111,7 @@ rules:
     applies:
     - type: action
       action: UNBLOCK_ACTIVITIES
+
 - type: flag
   flag: lockUser
   matches:
@@ -125,15 +141,15 @@ rules:
       action: UNBLOCK_SCREEN
 
 - type: flag
-  flag: lockSystem2
+  flag: lockFailsafe
   matches:
   - type: value
     value: true
     applies:
     - type: action
-      action: BLOCK_SYSTEM2
+      action: BLOCK_FAILSAFE
   - type: value
     value: false
     applies:
     - type: action
-      action: UNBLOCK_SYSTEM2
+      action: UNBLOCK_FAILSAFE

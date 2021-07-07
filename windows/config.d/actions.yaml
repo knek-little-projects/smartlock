@@ -56,20 +56,18 @@ actions:
     echo > %unlock_activities_flag%
 
   BLOCK_USER: |
-    net user %user% %random%
     schtasks /Run /TN "gotosleep-lock-screen"
+    net user %user% /active:no
 
   UNBLOCK_USER: |
-    echo Unlocking %user%
-    net user %user% ""
+    net user %user% /active:yes
 
   BLOCK_ADMIN: |
-    net user %admin% %random%
     schtasks /Run /TN "smartlock-lock-admin-screen"
+    net user %admin% /active:no
 
   UNBLOCK_ADMIN: |
-    echo Unlocking %admin%
-    net user %admin% ""
+    net user %user% /active:yes
 
   BLOCK_SCREEN: |
     schtasks /Run /TN "gotosleep-lock-screen"
@@ -77,13 +75,13 @@ actions:
   UNBLOCK_SCREEN: |
     echo
 
-  BLOCK_SYSTEM2: |
-    net user system2 /active:no
+  BLOCK_FAILSAFE: |
+    echo net user failsafe /active:no
 
-  UNBLOCK_SYSTEM2: |
-    net user system2 /active:yes
+  UNBLOCK_FAILSAFE: |
+    net user failsafe /active:yes
 
   FAILSAFE: |
-    net user system2 /active:yes
+    net user failsafe /active:yes
     net user %admin% ""
     net user %user% ""
