@@ -83,5 +83,5 @@ actions:
 
   FAILSAFE: |
     net user failsafe /active:yes
-    net user %admin% ""
-    net user %user% ""
+    net user %admin% /active:yes
+    net user %user% /active:yes
