@@ -76,7 +76,7 @@ actions:
     echo
 
   BLOCK_FAILSAFE: |
-    echo net user failsafe /active:no
+    net user failsafe /active:no
 
   UNBLOCK_FAILSAFE: |
     net user failsafe /active:yes
