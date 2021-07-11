@@ -7,7 +7,12 @@ env:
 actions:
 
   BLOCK_ACTIVITIES: |
-    echo $disallow_hosts | python3.8 smartlock-hostctl.py block /etc/hosts
+    ETC_HOSTS_ENTRY=`echo 0.0.0.0 $disallow_hosts`
+    grep -q "$ETC_HOSTS_ENTRY" /etc/hosts || (
+      echo >> /etc/hosts;
+      echo "$ETC_HOSTS_ENTRY" >> /etc/hosts;
+    )
+
     echo $disallow_exe | xargs -n1 pkill -KILL
     if test -f $unblock_activities_flag
     then
@@ -18,7 +23,7 @@ actions:
     fi
 
   UNBLOCK_ACTIVITIES: |
-    python3.8 smartlock-hostctl.py unblock-marked /etc/hosts
+    diff /etc/hosts~ /etc/hosts 1>/dev/null 2>/dev/null || cp -f /etc/hosts~ /etc/hosts
     touch $unblock_activities_flag
 
   BLOCK_USER: |
