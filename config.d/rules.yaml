@@ -63,7 +63,7 @@ rules:
 - name: Allow computer use
   type: periods
   periods:
-  - 04:00 23:00
+  - 04:00 22:00
   matches:
   - type: value
     value: false
