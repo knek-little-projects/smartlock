@@ -30,8 +30,13 @@ def form_hold():
 
     if flask.request.method == "POST":
         value = int(flask.request.form.get('value', 0)) * 60
-        assert balance - value >= 0
 
+        assert value > 0, \
+            "holding must be positive"
+
+        assert balance - value >= 0, \
+            "holding more than balance is not allowed"
+        
         balance -= value
 
         now = int(time.time())
@@ -59,7 +64,14 @@ def form_add():
 
     if flask.request.method == "POST":
         assert flask.request.form["secret"] == SECRET
+        
+        # negative add is allowed
         balance += int(flask.request.form.get("value", 0)) * 60
+        
+        # negative balance is not allowed
+        if balance < 0:
+            balance = 0
+
         return flask.redirect("")
 
     return f"""
