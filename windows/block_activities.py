@@ -27,6 +27,7 @@ unlock_activities_flag = os.environ["unlock_activities_flag"]
 if os.path.isfile(unlock_activities_flag):
     os.unlink(unlock_activities_flag)
     name_bl += os.environ['kill_on_activity_reblock'].splitlines()
+    os.system('taskkill /IM "chrome.exe" /F')
 
 killall(ps_bw_filter(
     user=user,

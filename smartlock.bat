@@ -1,0 +1,1 @@
+type config.d\* windows\config.d\* | python smartlock.py %*

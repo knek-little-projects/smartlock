@@ -67,7 +67,7 @@ actions:
     net user %admin% /active:no
 
   UNBLOCK_ADMIN: |
-    net user %user% /active:yes
+    net user %admin% /active:yes
 
   BLOCK_SCREEN: |
     schtasks /Run /TN "gotosleep-lock-screen"
