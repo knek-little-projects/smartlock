@@ -1,5 +1,5 @@
 flags:
-  lockAdmin: true
+  lockAdmin: false
   lockActivities: true
   lockUser: false
   lockScreen: false
@@ -58,6 +58,18 @@ rules:
     applies:
     - type: flag
       flag: lockScreen
+      value: true
+
+- name: Allow admin
+  type: periods
+  periods:
+  - 04:00 18:00
+  matches:
+  - type: value
+    value: false
+    applies:
+    - type: flag
+      flag: lockAdmin
       value: true
 
 - name: Allow computer use
