@@ -58,16 +58,20 @@ actions:
   BLOCK_USER: |
     schtasks /Run /TN "gotosleep-lock-screen"
     net user %user% /active:no
+    net user %user% %RANDOM%%RANDOM%%RANDOM%
 
   UNBLOCK_USER: |
     net user %user% /active:yes
+    net user %user% ""
 
   BLOCK_ADMIN: |
     schtasks /Run /TN "smartlock-lock-admin-screen"
+    net user %admin% %RANDOM%%RANDOM%%RANDOM%
     net user %admin% /active:no
 
   UNBLOCK_ADMIN: |
     net user %admin% /active:yes
+    net user %admin% ""
 
   BLOCK_SCREEN: |
     schtasks /Run /TN "gotosleep-lock-screen"

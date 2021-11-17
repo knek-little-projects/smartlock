@@ -1,6 +1,6 @@
 flags:
   lockAdmin: false
-  lockActivities: true
+  lockActivities: false
   lockUser: false
   lockScreen: false
   lockFailsafe: false
@@ -63,7 +63,7 @@ rules:
 - name: Allow admin
   type: periods
   periods:
-  - 04:00 18:00
+  - 04:00 11:00
   matches:
   - type: value
     value: false
@@ -87,7 +87,7 @@ rules:
 - name: Lock failsafe
   type: periods
   periods:
-  - 04:00 18:00
+  - 04:00 11:00
   matches:
   - type: value
     value: false
