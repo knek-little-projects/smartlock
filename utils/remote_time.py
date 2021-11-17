@@ -19,11 +19,16 @@ def _currentmillis_com():
     return date
 
 
-# def _tercdate():
-#     s = requests.get("https://terc.app").headers.get("Date")
-#     d = dateutil.parser.parse(s)
-#     d = d.astimezone(dateutil.tz.gettz('MSC'))
-#     return d
+def _pkradius_ru():
+    """
+    >>> d1 = dt.datetime.now(dt.timezone.utc)
+    >>> d2 = _pkradius_ru()
+    >>> abs(d1.timestamp() - d2.timestamp()) < 60
+    True
+    >>>
+    """
+    ts = requests.get("http://pkradius.ru:12345/ts").json()
+    return dt.datetime.utcfromtimestamp(ts).replace(tzinfo=dt.timezone.utc)
 
 
 def get_remote_utc_datetime() -> Optional[dt.datetime]:
@@ -34,9 +39,10 @@ def get_remote_utc_datetime() -> Optional[dt.datetime]:
     True
     >>>
     """
-    try:
-        return _currentmillis_com()
-    except Exception as e:
-        logging.error(str(e))
+    for remote_utc_datetime in _currentmillis_com, _pkradius_ru:
+        try:
+            return remote_utc_datetime()
+        except Exception as e:
+            logging.error(str(e))
 
     return None

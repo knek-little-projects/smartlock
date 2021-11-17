@@ -58,6 +58,11 @@ def form_hold():
     """
 
 
+@app.route('/ts')
+def ts():
+    return str(int(time.time()))
+
+
 @app.route('/form/add', methods=["GET", "POST"])
 def form_add():
     global balance
